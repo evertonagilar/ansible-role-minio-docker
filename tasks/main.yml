@@ -1,0 +1,17 @@
+- name: Variaveis para provisionar MinIO
+  debug:
+    msg:
+    - "minio_user: {{ minio_user }}"
+    - "minio_password: {{ minio_password }}"
+    - "minio_app_dir: {{ minio_app_dir }}"
+    - "minio_data_dir: {{ minio_data_dir }}"
+    - "minio_container_name: {{ minio_container_name }}"
+    - "minio_api_port: {{ minio_api_port }}"
+    - "minio_console_port: {{ minio_console_port }}"
+
+- name: Setup MinIO container in Docker
+  import_tasks: setup-minio-container.yml
+
+- name: Create bucket list
+  when: bucket_list | length > 0  
+  import_tasks: create-bucket-list.yml
