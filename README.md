@@ -29,9 +29,10 @@ This Ansible role installs **MinIO** on Docker container.
 - hosts: all
   become: true
   roles:
-    - evertonagilar.docker-tls
+    - role: evertonagilar.docker-tls
     - role: evertonagilar.minio-docker
       vars:
+        minio_image: minio/minio:latest
         minio_user: minioadmin
         minio_password: minioadmin
         bucket_list:

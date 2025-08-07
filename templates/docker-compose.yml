@@ -1,6 +1,6 @@
 services:
   {{ minio_container_name }}:
-    image: quay.io/minio/minio:latest
+    image: {{ minio_image }}
     container_name: {{ minio_container_name }}
     ports:
       - "{{ minio_api_port }}:9000"
@@ -11,4 +11,4 @@ services:
       MINIO_ROOT_USER: {{ minio_user }}
       MINIO_ROOT_PASSWORD: {{ minio_password }}
     command: server /data --console-address ":9001"
-    restart: unless-stopped
+    restart: {{ minion_restart }} 

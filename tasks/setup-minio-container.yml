@@ -35,21 +35,27 @@
 
 - name: Start MinIO container in Docker
   block:
-    - name: Check if MinIO container is running
-      command: docker ps --filter "name={{ minio_container_name }}" --format "{{'{{.Names}}'}}"
-      register: minio_status
-      changed_when: false
-      failed_when: false
+  - name: Check if MinIO container is running
+    command: docker ps --filter "name={{ minio_container_name }}" --format "{{'{{.Names}}'}}"
+    register: minio_status
+    changed_when: false
+    failed_when: false
 
-    - name: Stop current MinIO container if running
-      when: minio_status.stdout != ""
-      command: /usr/bin/docker stop --timeout 7 {{ minio_container_name }}
-      args:
-        chdir: "{{ minio_app_dir }}"
-      ignore_errors: true
+  - name: Stop current MinIO container if running
+    when: minio_status.stdout != ""
+    command: /usr/bin/docker stop --timeout 7 {{ minio_container_name }}
+    args:
+      chdir: "{{ minio_app_dir }}"
+    ignore_errors: true
 
-    - name: Start MinIO container
-      command: /usr/bin/docker compose up -d
-      args:
-        chdir: "{{ minio_app_dir }}"
+  - name: Start MinIO server container
+    command: /usr/bin/docker compose up -d
+    args:
+      chdir: "{{ minio_app_dir }}"
+
+  - name: Wait for MinIO port 9000 to be available
+    ansible.builtin.wait_for:
+      port: 9000
+      timeout: 60
+
   environment: "{{ docker_env | default({}) }}"
