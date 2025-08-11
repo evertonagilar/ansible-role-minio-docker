@@ -1,0 +1,46 @@
+---
+- name: Create directory /var/lib/docker-plugins/rclone/config
+  file:
+    path: /var/lib/docker-plugins/rclone/config
+    state: directory
+    mode: '0755'
+    owner: root
+    group: root
+
+- name: Create directory /var/lib/docker-plugins/rclone/cache
+  file:
+    path: /var/lib/docker-plugins/rclone/cache
+    state: directory
+    mode: '0755'
+    owner: root
+    group: root
+
+- name: Define variables to docker tls if necessary
+  import_tasks: define_docker_host.yml
+
+- name: Install the plugin rclone/docker-volume-rclone if not installed
+  command: docker plugin install rclone/docker-volume-rclone --alias rclone --grant-all-permissions
+  environment: "{{ docker_env | default({}) }}"
+  ignore_errors: true
+  
+- name: Enable rclone plugin if disabled
+  command: docker plugin enable rclone
+  environment: "{{ docker_env | default({}) }}"
+  ignore_errors: true
+
+- name: Install rclone.conf to /var/lib/docker-plugins/rclone/config/rclone.conf
+  template:
+    src: rclone.conf
+    dest: /var/lib/docker-plugins/rclone/config/rclone.conf
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Create volume for client mount the bucket
+  command: >
+    docker volume create
+    -d rclone
+    -o remote={{ item }}:
+    {{ bucket_vol_prefix }}{{ item }}
+  loop: "{{ bucket_list }}"
+  environment: "{{ docker_env | default({}) }}"

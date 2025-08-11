@@ -8,3 +8,5 @@ minion_restart: unless-stopped
 minio_api_port: 9000
 minio_console_port: 9001
 bucket_list: []
+bucket_vol_prefix: vol_
+install_rclone: true

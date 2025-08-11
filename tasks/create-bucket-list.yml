@@ -1,10 +1,11 @@
+- name: Define variables to docker tls if necessary
+  import_tasks: define_docker_host.yml
+
 - name: Create an alias to mc on container
   command: >
     docker exec {{ minio_container_name }}
     mc alias set local http://localhost:9000 {{ minio_user }} {{ minio_password }}
-  environment:
-    DOCKER_HOST: tcp://127.0.0.1:2376
-    DOCKER_TLS_VERIFY: '1'
+  environment: "{{ docker_env | default({}) }}"
   register: mc_alias_result
   changed_when: "'Added' in mc_alias_result.stdout or 'exists' in mc_alias_result.stdout"
   failed_when: mc_alias_result.rc != 0 and "'already exists' not in mc_alias_result.stderr"
@@ -14,9 +15,7 @@
     docker exec {{ minio_container_name }}
     mc mb local/{{ item }}
   loop: "{{ bucket_list }}"
-  environment:
-    DOCKER_HOST: tcp://127.0.0.1:2376
-    DOCKER_TLS_VERIFY: '1'
+  environment: "{{ docker_env | default({}) }}"
   register: mc_mb_result
   changed_when: "'created' in mc_mb_result.stdout.lower()"
   failed_when: "'you already own it' not in mc_mb_result.stdout.lower() and mc_mb_result.rc != 0"

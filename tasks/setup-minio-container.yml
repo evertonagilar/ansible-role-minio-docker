@@ -20,21 +20,11 @@
     dest: "{{ minio_app_dir }}/docker-compose.yml"
     mode: "0644"
 
-- name: Check if TLS is enabled in Docker
-  stat:
-    path: "{{ ansible_env.HOME }}/.docker/cert.pem"
-  register: docker_tls_cert
-
-- name: Define variables to docker tls
-  set_fact:
-    docker_env:
-      DOCKER_HOST: tcp://127.0.0.1:2376
-      DOCKER_TLS_VERIFY: '1'
-      DOCKER_CERT_PATH: "{{ ansible_env.HOME }}/.docker"
-  when: docker_tls_cert.stat.exists
-
 - name: Start MinIO container in Docker
   block:
+  - name: Define variables to docker tls if necessary
+    import_tasks: define_docker_host.yml
+
   - name: Check if MinIO container is running
     command: docker ps --filter "name={{ minio_container_name }}" --format "{{'{{.Names}}'}}"
     register: minio_status

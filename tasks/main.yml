@@ -1,4 +1,4 @@
-- name: Variaveis para provisionar MinIO
+- name: Variables to setup MinIO server in Docker
   debug:
     msg:
     - "minio_user: {{ minio_user }}"
@@ -8,10 +8,17 @@
     - "minio_container_name: {{ minio_container_name }}"
     - "minio_api_port: {{ minio_api_port }}"
     - "minio_console_port: {{ minio_console_port }}"
+    - "bucket_list: {{ bucket_list }}"
+    - "bucket_vol_prefix: {{ bucket_vol_prefix }}"
 
 - name: Setup MinIO container in Docker
   import_tasks: setup-minio-container.yml
 
 - name: Create bucket list
-  when: bucket_list | length > 0  
   import_tasks: create-bucket-list.yml
+  when: bucket_list | length > 0  
+
+- name: Setup the plugin rclone
+  import_tasks: setup-plugin-rclone.yml
+  when: (install_rclone | default(false)) | bool
+
